@@ -6,15 +6,15 @@
 IPADDRESS=`ifconfig | grep 'inet addr:' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut -d: -f2 | awk '{ print $1}' | head -1`
 IPADD="s/ipaddresxxx/$IPADDRESS/g";
 # clean repo
-apt-get clean
+sudo apt-get clean
 # update repo
-apt-get update
+sudo apt-get update
 # upgrade system
-apt-get -y upgrade
+sudo apt-get -y upgrade
 # full upgrade system
-apt-get -y full-upgrade
+sudo apt-get -y full-upgrade
 # install needs
-apt-get -y install stunnel4 apache2 openvpn easy-rsa ufw
+sudo apt-get -y install stunnel4 apache2 openvpn easy-rsa ufw
 # stunnel
 cd /etc/stunnel/
 openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -sha256 -subj '/CN=127.0.0.1/O=localhost/C=US' -keyout /etc/stunnel/stunnel.pem -out /etc/stunnel/stunnel.pem
@@ -30,8 +30,9 @@ iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 sudo cp /etc/stunnel/stunnel.pem ~
 echo "client = yes\ndebug = 6\n[openvpn]\naccept = 127.0.0.1:1194\nconnect = $IPADDRESS:443\nTIMEOUTclose = 0\nverify = 0\nsni = m.facebook.com" > /var/www/html/stunnel.conf
 # openvpn
-cp -r /usr/share/easy-rsa/ /etc/openvpn
 mkdir /etc/openvpn/easy-rsa/keys
+mkdir /etc/openvpn/easy-rsa/vars
+cp -r /usr/share/easy-rsa/ /etc/openvpn
 sed -i 's|export KEY_COUNTRY="US"|export KEY_COUNTRY="PH"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_PROVINCE="CA"|export KEY_PROVINCE="MANILA"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_CITY="SanFrancisco"|export KEY_CITY="METRO MANILA"|' /etc/openvpn/easy-rsa/vars
