@@ -68,9 +68,6 @@ for i in /proc/sys/net/ipv4/conf/*/send_redirects; do echo 0 > $i; done
 # Don't accept source routed packets.
 for i in /proc/sys/net/ipv4/conf/*/accept_source_route; do echo 0 > $i; done
  
-# Disable multicast routing
-for i in /proc/sys/net/ipv4/conf/*/mc_forwarding; do echo 0 > $i; done
- 
 # Disable proxy_arp.
 for i in /proc/sys/net/ipv4/conf/*/proxy_arp; do echo 0 > $i; done
  
