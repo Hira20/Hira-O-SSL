@@ -303,5 +303,5 @@ echo "Do not press CTRL+C to avoid reboot cancelation!"
 echo
 echo "################# HiRATECHi #################"
 echo "################# reputation #################"
-sleep 60
+sleep 120
 reboot &
