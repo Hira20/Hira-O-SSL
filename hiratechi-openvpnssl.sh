@@ -125,7 +125,7 @@ cat > /var/www/html/openvpnssl.ovpn <<-END
 client
 dev tun
 proto tcp
-remote 127.0.0.1 1194
+remote 127.0.0.1 8888
 persist-key
 persist-tun
 dev tun
