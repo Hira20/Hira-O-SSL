@@ -321,8 +321,8 @@ apt-get --fix-missing install
 apt-get -y autoremove
 # create openvpn account
 RANDOMNUM=`cat /dev/urandom | tr -dc '0-9' | fold -w 6 | head -n 1`
-useradd hiratechi
-echo "OpenVPNSSL:$RANDOMNUM" | chpasswd
+useradd OpenVpnSSL
+echo "OpenVpnSSL:$RANDOMNUM" | chpasswd
 clear
 echo "######### Download your config files here! #########"
 echo "~> http://$IPADDRESS/openvpn.ovpn - Normal config"
@@ -332,7 +332,7 @@ echo "~> http://$IPADDRESS/openvpn.tgz - All config"
 echo "######### Download your config files here! #########"
 echo
 echo "################# OpenVPN Account #################"
-echo "~> Username: OpenVPNSSL"
+echo "~> Username: OpenVpnSSL"
 echo "~> Password: $RANDOMNUM"
 echo "################# OpenVPN Account #################"
 echo
