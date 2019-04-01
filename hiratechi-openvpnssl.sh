@@ -28,7 +28,7 @@ echo "cert = /etc/stunnel/stunnel.pem" >> /etc/stunnel/stunnel.conf
 sudo sed -i -e 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 sudo cp /etc/stunnel/stunnel.pem ~
-echo "client = yes\ndebug = 6\n[openvpn]\naccept = 127.0.0.1:1194\nconnect = $IPADDRESS:443\nTIMEOUTclose = 0\nverify = 0\nsni = free.facebook.com" > /var/www/html/stunnel.conf
+echo "client = yes\ndebug = 6\n[openvpn]\naccept = 127.0.0.1:1194\nconnect = $IPADDRESS:443\nTIMEOUTclose = 0\nverify = 0\nsni = m.facebook.com" > /var/www/html/stunnel.conf
 # openvpn
 mkdir /etc/openvpn/easy-rsa/keys
 mkdir /etc/openvpn/easy-rsa/vars
@@ -36,11 +36,11 @@ cp -r /usr/share/easy-rsa/ /etc/openvpn
 sed -i 's|export KEY_COUNTRY="US"|export KEY_COUNTRY="PH"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_PROVINCE="CA"|export KEY_PROVINCE="MANILA"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_CITY="SanFrancisco"|export KEY_CITY="METRO MANILA"|' /etc/openvpn/easy-rsa/vars
-sed -i 's|export KEY_ORG="Fort-Funston"|export KEY_ORG="TEAM EPIPHANY"|' /etc/openvpn/easy-rsa/vars
+sed -i 's|export KEY_ORG="Fort-Funston"|export KEY_ORG="TEAM_EPIPHANY"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_EMAIL="me@myhost.mydomain"|export KEY_EMAIL="HIRATECHI_AKA_REPUTATION@TEAM_EPIPHANY"|' /etc/openvpn/easy-rsa/vars
-sed -i 's|export KEY_OU="MyOrganizationalUnit"|export KEY_OU="STRICTLY NO TORRENT ALLOWED IN THIS SERVER"|' /etc/openvpn/easy-rsa/vars
+sed -i 's|export KEY_OU="MyOrganizationalUnit"|export KEY_OU="STRICTLY_NO_TORRENT_ALLOWED_IN_THIS_SERVER"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_NAME="EasyRSA"|export KEY_NAME="HIRATECHI aka REPUTATION"|' /etc/openvpn/easy-rsa/vars
-sed -i 's|export KEY_OU=changeme|export KEY_OU=STRICTLY NO TORRENT ALLOWED IN THIS SERVER|' /etc/openvpn/easy-rsa/vars
+sed -i 's|export KEY_OU=changeme|export KEY_OU=STRICTLY_NO_TORRENT_ALLOWED_IN_THIS_SERVER|' /etc/openvpn/easy-rsa/vars
 # create diffie-helman pem
 openssl dhparam -out /etc/openvpn/dh1024.pem 1024
 # create pki
@@ -173,7 +173,7 @@ http_access allow SSH
 http_access allow manager localhost
 http_access deny manager
 http_access allow localhost
-http_access allow all
+http_access deny all
 http_port 8080
 http_port 8000
 http_port 3128
@@ -297,11 +297,11 @@ echo "~> Username: OpenVpnSSL"
 echo "~> Password: $RANDOMNUM"
 echo "################# OpenVPN Account #################"
 echo
-echo "Your server will reboot in 2 minutes"
+echo "Your server will reboot in 1 minute"
 echo "So please remember your account info before anything else"
 echo "Do not press CTRL+C to avoid reboot cancelation!"
 echo
 echo "################# HiRATECHi #################"
 echo "################# reputation #################"
-sleep 120
+sleep 60
 reboot &
