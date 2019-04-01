@@ -38,9 +38,9 @@ sed -i 's|export KEY_PROVINCE="CA"|export KEY_PROVINCE="MANILA"|' /etc/openvpn/e
 sed -i 's|export KEY_CITY="SanFrancisco"|export KEY_CITY="METRO MANILA"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_ORG="Fort-Funston"|export KEY_ORG="TEAM EPIPHANY"|' /etc/openvpn/easy-rsa/vars
 sed -i 's|export KEY_EMAIL="me@myhost.mydomain"|export KEY_EMAIL="HIRATECHI_AKA_REPUTATION@TEAM_EPIPHANY"|' /etc/openvpn/easy-rsa/vars
-sed -i 's|export KEY_OU="MyOrganizationalUnit"|export KEY_OU="TEAM_EPIPHANY"|' /etc/openvpn/easy-rsa/vars
-sed -i 's|export KEY_NAME="EasyRSA"|export KEY_NAME="HIRATECHI"|' /etc/openvpn/easy-rsa/vars
-sed -i 's|export KEY_OU=changeme|export KEY_OU=TEAM_EPIPHANY|' /etc/openvpn/easy-rsa/vars
+sed -i 's|export KEY_OU="MyOrganizationalUnit"|export KEY_OU="STRICTLY NO TORRENT ALLOWED IN THIS SERVER"|' /etc/openvpn/easy-rsa/vars
+sed -i 's|export KEY_NAME="EasyRSA"|export KEY_NAME="HIRATECHI aka REPUTATION"|' /etc/openvpn/easy-rsa/vars
+sed -i 's|export KEY_OU=changeme|export KEY_OU=STRICTLY NO TORRENT ALLOWED IN THIS SERVER|' /etc/openvpn/easy-rsa/vars
 # create diffie-helman pem
 openssl dhparam -out /etc/openvpn/dh1024.pem 1024
 # create pki
@@ -189,6 +189,7 @@ sed -i $IPADD /etc/squid/squid.conf;
 cat > /etc/iptables.up.rules <<-END
 *nat
 :PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
 -A POSTROUTING -j SNAT --to-source ipaddresxxx
@@ -204,6 +205,17 @@ COMMIT
 :fail2ban-ssh - [0:0]
 -A FORWARD -i eth0 -o ppp0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A FORWARD -i ppp0 -o eth0 -j ACCEPT
+-A FORWARD -p tcp -m tcp --dport 6881:6889 -j DROP
+-A FORWARD -m string --string "get_peers" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "BitTorrent protocol" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "peer_id=" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "announce.php?passkey=" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "torrent" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "announce" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP
+-A FORWARD -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP
 -A INPUT -p ICMP --icmp-type 8 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 53 -j ACCEPT
 -A INPUT -p tcp --dport 22  -m state --state NEW -j ACCEPT
@@ -219,6 +231,33 @@ COMMIT
 -A INPUT -p udp --dport 8000  -m state --state NEW -j ACCEPT
 -A INPUT -p tcp --dport 8080  -m state --state NEW -j ACCEPT
 -A INPUT -p udp --dport 8080  -m state --state NEW -j ACCEPT
+-A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+-A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+-A INPUT -f -j DROP
+-A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
+-A INPUT -m string --string "peer_id" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "BitTorrent" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "BitTorrent protocol" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "bittorrent-announce" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "announce.php?passkey=" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "find_node" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "info_hash" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "get_peers" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "announce" --algo kmp --to 65535 -j DROP
+-A INPUT -m string --string "announce_peers" --algo kmp --to 65535 -j DROP
+-A INPUT -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP
+-A INPUT -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP
+-A INPUT -p udp -m string --string "announce" --algo bm --to 65535 -j DROP
+-A INPUT -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP
+-A INPUT -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP
+-A OUTPUT -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP
+-A OUTPUT -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP
+-A OUTPUT -p udp -m string --string "announce" --algo bm --to 65535 -j DROP
+-A OUTPUT -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP
+-A OUTPUT -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP
+-A OUTPUT -p tcp -m tcp --dport 1723 -j ACCEPT
+-A OUTPUT -p icmp -m icmp --icmp-type 8 -j DROP
+-A OUTPUT -p tcp -m tcp --dport 6881:6889 -j DROP
 COMMIT
 
 *raw
@@ -283,7 +322,7 @@ apt-get -y autoremove
 # create openvpn account
 RANDOMNUM=`cat /dev/urandom | tr -dc '0-9' | fold -w 6 | head -n 1`
 useradd hiratechi
-echo "hiratechi:$RANDOMNUM" | chpasswd
+echo "OpenVPNSSL:$RANDOMNUM" | chpasswd
 clear
 echo "######### Download your config files here! #########"
 echo "~> http://$IPADDRESS/openvpn.ovpn - Normal config"
@@ -293,14 +332,14 @@ echo "~> http://$IPADDRESS/openvpn.tgz - All config"
 echo "######### Download your config files here! #########"
 echo
 echo "################# OpenVPN Account #################"
-echo "~> Username: hiratechi"
+echo "~> Username: OpenVPNSSL"
 echo "~> Password: $RANDOMNUM"
 echo "################# OpenVPN Account #################"
 echo
-echo "Your system will reboot in 1 minute."
+echo "Your system will reboot in 2 minutes. So please remember your account info before anything else."
 echo "Do not press CTRL+C to avoid reboot cancelation!"
 echo
 echo "################# HiRATECHi #################"
 echo "################# reputation #################"
-sleep 60
+sleep 120
 reboot &
