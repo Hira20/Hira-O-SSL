@@ -6,15 +6,15 @@
 IPADDRESS=`ifconfig | grep 'inet addr:' | grep -v inet6 | grep -vE '127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | cut -d: -f2 | awk '{ print $1}' | head -1`
 IPADD="s/ipaddresxxx/$IPADDRESS/g";
 # clean repo
-sudo apt-get clean
+apt-get clean
 # update repo
-sudo apt-get update
+apt-get update
 # upgrade system
-sudo apt-get -y upgrade
+apt-get -y upgrade
 # full upgrade system
-sudo apt-get -y full-upgrade
+apt-get -y full-upgrade
 # install needs
-sudo apt-get -y install stunnel4 apache2 openvpn easy-rsa ufw
+apt-get -y install stunnel4 apache2 openvpn easy-rsa ufw
 # stunnel
 cd /etc/stunnel/
 openssl req -new -newkey rsa:2048 -days 3650 -nodes -x509 -sha256 -subj '/CN=127.0.0.1/O=localhost/C=US' -keyout /etc/stunnel/stunnel.pem -out /etc/stunnel/stunnel.pem
@@ -28,7 +28,7 @@ echo "cert = /etc/stunnel/stunnel.pem" >> /etc/stunnel/stunnel.conf
 sudo sed -i -e 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 sudo cp /etc/stunnel/stunnel.pem ~
-echo "client = yes\ndebug = 6\n[openvpn]\naccept = 127.0.0.1:1194\nconnect = $IPADDRESS:443\nTIMEOUTclose = 0\nverify = 0\nsni = m.facebook.com" > /var/www/html/stunnel.conf
+echo "client = yes\ndebug = 6\n[openvpn]\naccept = 127.0.0.1:1194\nconnect = $IPADDRESS:443\nTIMEOUTclose = 0\nverify = 0\nsni = free.facebook.com" > /var/www/html/stunnel.conf
 # openvpn
 mkdir /etc/openvpn/easy-rsa/keys
 mkdir /etc/openvpn/easy-rsa/vars
@@ -125,7 +125,7 @@ cat > /var/www/html/openvpnssl.ovpn <<-END
 client
 dev tun
 proto tcp
-remote 127.0.0.1 8888
+remote 127.0.0.1 1194
 persist-key
 persist-tun
 dev tun
@@ -173,7 +173,7 @@ http_access allow SSH
 http_access allow manager localhost
 http_access deny manager
 http_access allow localhost
-http_access deny all
+http_access allow all
 http_port 8080
 http_port 8000
 http_port 3128
@@ -189,7 +189,6 @@ sed -i $IPADD /etc/squid/squid.conf;
 cat > /etc/iptables.up.rules <<-END
 *nat
 :PREROUTING ACCEPT [0:0]
-:INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
 -A POSTROUTING -j SNAT --to-source ipaddresxxx
@@ -205,17 +204,6 @@ COMMIT
 :fail2ban-ssh - [0:0]
 -A FORWARD -i eth0 -o ppp0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A FORWARD -i ppp0 -o eth0 -j ACCEPT
--A FORWARD -p tcp -m tcp --dport 6881:6889 -j DROP
--A FORWARD -m string --string "get_peers" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "BitTorrent protocol" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "peer_id=" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "announce.php?passkey=" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "torrent" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "announce" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP
--A FORWARD -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP
 -A INPUT -p ICMP --icmp-type 8 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 53 -j ACCEPT
 -A INPUT -p tcp --dport 22  -m state --state NEW -j ACCEPT
@@ -231,33 +219,6 @@ COMMIT
 -A INPUT -p udp --dport 8000  -m state --state NEW -j ACCEPT
 -A INPUT -p tcp --dport 8080  -m state --state NEW -j ACCEPT
 -A INPUT -p udp --dport 8080  -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
--A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
--A INPUT -f -j DROP
--A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP
--A INPUT -m string --string "peer_id" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "BitTorrent" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "BitTorrent protocol" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "bittorrent-announce" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "announce.php?passkey=" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "find_node" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "info_hash" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "get_peers" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "announce" --algo kmp --to 65535 -j DROP
--A INPUT -m string --string "announce_peers" --algo kmp --to 65535 -j DROP
--A INPUT -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP
--A INPUT -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP
--A INPUT -p udp -m string --string "announce" --algo bm --to 65535 -j DROP
--A INPUT -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP
--A INPUT -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP
--A OUTPUT -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP
--A OUTPUT -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP
--A OUTPUT -p udp -m string --string "announce" --algo bm --to 65535 -j DROP
--A OUTPUT -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP
--A OUTPUT -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP
--A OUTPUT -p tcp -m tcp --dport 1723 -j ACCEPT
--A OUTPUT -p icmp -m icmp --icmp-type 8 -j DROP
--A OUTPUT -p tcp -m tcp --dport 6881:6889 -j DROP
 COMMIT
 
 *raw
@@ -336,10 +297,11 @@ echo "~> Username: OpenVpnSSL"
 echo "~> Password: $RANDOMNUM"
 echo "################# OpenVPN Account #################"
 echo
-echo "Your system will reboot in 2 minutes. So please remember your account info before anything else."
+echo "Your server will reboot in 2 minutes"
+echo "So please remember your account info before anything else"
 echo "Do not press CTRL+C to avoid reboot cancelation!"
 echo
 echo "################# HiRATECHi #################"
 echo "################# reputation #################"
-sleep 120
+sleep 60
 reboot &
